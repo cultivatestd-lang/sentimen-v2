@@ -341,7 +341,7 @@ memanfaatkan GPU.
 """
 
 # Install library
-!pip install transformers torch -q
+#!pip install transformers torch -q
 
 from transformers import pipeline
 import torch
