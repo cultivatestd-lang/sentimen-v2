@@ -191,6 +191,104 @@ kamus_slang = {
     'prabowo': 'presiden',
 }
 
+# ═══════════════════════════════════════════════════════════════
+# KOREKSI STEMMING SASTRAWI
+# ═══════════════════════════════════════════════════════════════
+# Sastrawi sering salah stem kata turunan sentimen.
+# Kamus ini memperbaiki hasil stemming yang salah.
+kamus_stem_kustom = {
+    # Kata yang salah di-stem oleh Sastrawi
+    'keburukan': 'buruk',
+    'keburu': 'buruk',           # Sastrawi salah stem: keburukan → keburu
+    'ketidakadilan': 'tidak adil',
+    'keterpurukan': 'terpuruk',
+    'kebodohan': 'bodoh',
+    'kerusakan': 'rusak',
+    'kerusuhan': 'rusuh',
+    'kebencian': 'benci',
+    'kejahatan': 'jahat',
+    'kegagalan': 'gagal',
+    'kebahagiaan': 'bahagia',
+    'keberhasilan': 'berhasil',
+    'kesehatan': 'sehat',
+    'kebersihan': 'bersih',
+    'keamanan': 'aman',
+    'keindahan': 'indah',
+    'kenyamanan': 'nyaman',
+    'kemiskinan': 'miskin',
+    'kekerasan': 'keras',
+    'keterlambatan': 'lambat',
+    'kerugian': 'rugi',
+    'kesuksesan': 'sukses',
+    'kesedihan': 'sedih',
+    'kekecewaan': 'kecewa',
+    'kemarahan': 'marah',
+    'ketidakbecusan': 'becus',
+    'ketidakmampuan': 'mampu',
+    'ketidakberesan': 'beres',
+    'ketidakjujuran': 'jujur',
+    'memperparah': 'parah',
+    'meracuni': 'racun',
+    'mencurangi': 'curang',
+}
+
+# ═══════════════════════════════════════════════════════════════
+# LEXIKON SENTIMEN BAHASA INDONESIA UNTUK FITUR TAMBAHAN
+# ═══════════════════════════════════════════════════════════════
+lexicon_positif = set([
+    'baik', 'bagus', 'mantap', 'keren', 'hebat', 'indah',
+    'senang', 'bahagia', 'gembira', 'puas', 'bangga', 'suka',
+    'cinta', 'sayang', 'peduli', 'bermanfaat', 'berguna',
+    'tepat', 'cerdas', 'pintar', 'berhasil', 'sukses', 'lancar',
+    'bersih', 'sehat', 'kuat', 'berkualitas', 'murah',
+    'terjangkau', 'memadai', 'cukup', 'enak', 'lezat', 'nikmat',
+    'segar', 'nyaman', 'aman', 'damai', 'rukun',
+    'membantu', 'memudahkan', 'memperbaiki', 'meningkatkan',
+    'tanggap', 'cepat', 'sigap', 'transparan', 'adil', 'merata',
+    'efektif', 'efisien', 'produktif', 'layak', 'pantas',
+    'terbaik', 'terhebat', 'terkeren', 'terbesar',
+    'semangat', 'antusias', 'optimis', 'positif',
+    'syukur', 'bersyukur', 'berterima kasih',
+    'kebahagiaan', 'kesuksesan', 'keberhasilan', 'kebaikan',
+    'kesehatan', 'keindahan', 'kenyamanan', 'keamanan', 'keadilan',
+    'terbantu', 'terbantukan', 'terayomi',
+])
+
+lexicon_negatif = set([
+    'buruk', 'jelek', 'parah', 'busuk', 'rusak', 'sakit',
+    'sedih', 'kecewa', 'kesal', 'marah', 'benci',
+    'gagal', 'rugi', 'celaka', 'susah', 'sulit',
+    'curang', 'penipuan', 'bohong', 'jahat',
+    'bahaya', 'berbahaya', 'ancam', 'ancaman',
+    'takut', 'cemas', 'khawatir', 'gelisah',
+    'menderita', 'tersiksa', 'hancur', 'runtuh',
+    'racun', 'keracunan', 'beracun',
+    'sampah', 'sia-sia', 'percuma', 'mubazir', 'ngawur',
+    'amburadul', 'berantakan', 'kacau',
+    'keburukan', 'kebodohan', 'kemiskinan', 'kekerasan',
+    'kebencian', 'kemarahan', 'kesedihan', 'kekecewaan',
+    'ketidakadilan', 'ketidakjujuran',
+    'kerugian', 'kerusakan', 'kegagalan',
+    'mengecewakan', 'menyedihkan', 'mengerikan',
+    'memprihatinkan', 'memalukan', 'merugikan', 'membahayakan',
+    'memperburuk', 'memperparah',
+    'terburuk', 'terparah', 'terjelek',
+    'korupsi', 'kriminal',
+    'susah', 'sulit', 'payah', 'loyo',
+    'mangkrak', 'terbengkalai', 'telantar',
+    # Kata sentimen negatif khusus konteks MBG
+    'lapar', 'begah', 'mual', 'pusing',
+    'alergi', 'kembung', 'diare',
+])
+
+def stem_kustom(kata):
+    """Stemming dengan koreksi kustom untuk kata yang salah di-stem Sastrawi"""
+    # Cek di kamus kustom dulu
+    if kata in kamus_stem_kustom:
+        return kamus_stem_kustom[kata]
+    # Fallback ke Sastrawi
+    return stemmer.stem(kata)
+
 def normalisasi_slang(teks):
     kata_list = teks.split()
     return ' '.join([kamus_slang.get(kata, kata) for kata in kata_list])
@@ -293,12 +391,12 @@ custom_stopwords = [
 semua_stopword = set(stopword_list) | set(custom_stopwords)
 
 def tokenize_dan_clean(teks):
-    """Tokenisasi, hapus stopword, dan stemming"""
+    """Tokenisasi, hapus stopword, dan stemming dengan koreksi kustom"""
     if not teks or teks.strip() == '':
         return ''
     tokens = word_tokenize(teks)
     tokens = [t for t in tokens if t not in semua_stopword and len(t) > 2]
-    tokens = [stemmer.stem(t) for t in tokens]
+    tokens = [stem_kustom(t) for t in tokens]
     return ' '.join(tokens)
 
 print('✅ Stemmer & stopword siap')
@@ -436,6 +534,34 @@ plt.tight_layout()
 plt.savefig('distribusi_sentimen.png', dpi=150, bbox_inches='tight')
 plt.show()
 
+# ─── Tabel Presentase Sentimen ──────────────────────────────
+print('\n📊 PRESENTASE SENTIMEN:')
+print('=' * 45)
+total = len(df)
+for sentimen in ['Positif', 'Negatif', 'Netral']:
+    jml = sentimen_counts.get(sentimen, 0)
+    pct = (jml / total) * 100
+    bar = '█' * int(pct / 2) + '░' * (50 - int(pct / 2))
+    print(f'  {sentimen:<10} {jml:>5} tweet  {pct:>5.1f}%  {bar}')
+print('=' * 45)
+print(f'  {"Total":<10} {total:>5} tweet  100.0%')
+print()
+
+# ─── Rata-rata Skor Sentimen per Kelas ──────────────────────
+print('📊 RATA-RATA SKOR SENTIMEN PER KELAS (dari lexicon):')
+print('=' * 55)
+for sentimen in ['Positif', 'Negatif', 'Netral']:
+    teks_gabung = ' '.join(df[df['sentimen'] == sentimen]['teks_clean'].dropna())
+    if teks_gabung.strip():
+        kata = teks_gabung.lower().split()
+        pos = sum(1 for k in kata if k in lexicon_positif)
+        neg = sum(1 for k in kata if k in lexicon_negatif)
+        total_kata = pos + neg
+        skor = ((pos - neg) / (total_kata + 1)) * 100
+        print(f'  {sentimen:<10} → lexicon polarity: {skor:>+6.1f}%  (pos={pos}, neg={neg})')
+print('=' * 55)
+print()
+
 # ─── 5.3 WordCloud per Sentimen ─────────────────────────────
 fig, axes = plt.subplots(1, 3, figsize=(18, 5))
 sentimen_list = ['Positif', 'Negatif', 'Netral']
@@ -477,12 +603,15 @@ df_export.head(5)
 
 # ─── 6.1 Persiapan Data untuk Pemodelan ─────────────────────
 
-# Gunakan teks_proses (sudah di-stemming) sebagai fitur
+# Gunakan teks_clean (tanpa stemming) sebagai fitur utama
+# ⚡ Lebih presisi karena kata seperti "keracunan", "keburukan" dll.
+#    tetap utuh dan bisa dipelajari oleh TF-IDF + SVM
 # Hapus kelas Netral jika sampelnya terlalu sedikit (opsional)
 # df_model = df[df['sentimen'] != 'Netral'].copy()  # hapus netral
 df_model = df.copy()  # pakai semua kelas
 
-X = df_model['teks_proses']
+X = df_model['teks_clean']       # Teks clean (tanpa stemming — lebih kaya fitur)
+X_stem = df_model['teks_proses']  # Teks stemmed (tetap dipertahankan untuk referensi)
 y = df_model['sentimen']
 
 print('📊 Distribusi kelas:')
@@ -517,6 +646,56 @@ print(f'✅ TF-IDF selesai')
 print(f'   Training set : {X_train_tfidf.shape}')
 print(f'   Testing set  : {X_test_tfidf.shape}')
 
+# ─── 6.2b Fitur Sentimen Lexicon ─────────────────────────────
+# Tambahkan fitur berbasis lexicon sentimen untuk meningkatkan presisi
+from scipy.sparse import hstack, csr_matrix
+
+def hitung_fitur_sentimen(teks_series):
+    """
+    Ekstrak fitur sentimen dari teks.
+    Output: [pos, neg, polarity, pos_ratio, neg_ratio, sentimen_persen, sentimen_score]
+      - pos / neg          : jumlah kata positif/negatif
+      - polarity           : pos - neg
+      - pos_ratio/neg_ratio: proporsi 0.0 - 1.0
+      - sentimen_persen    : skala -100 (sangat negatif) sampai +100 (sangat positif)
+      - sentimen_score     : 0.0 (sangat negatif) - 0.5 (netral) - 1.0 (sangat positif)
+    """
+    hasil = []
+    for teks in teks_series:
+        if not isinstance(teks, str) or teks.strip() == '':
+            hasil.append([0, 0, 0, 0.0, 0.0, 0.0, 0.5])
+            continue
+        kata = teks.lower().split()
+        pos = sum(1 for k in kata if k in lexicon_positif)
+        neg = sum(1 for k in kata if k in lexicon_negatif)
+        total = pos + neg
+        pos_ratio = pos / total if total > 0 else 0.0
+        neg_ratio = neg / total if total > 0 else 0.0
+        polarity = pos - neg
+        # Presentase sentimen: -100% (negatif) sd +100% (positif)
+        sentimen_persen = ((pos - neg) / (total + 1)) * 100
+        # Skor 0-1: 0=sangat negatif, 0.5=netral, 1=sangat positif
+        sentimen_score = (sentimen_persen / 100 + 1) / 2 if total > 0 else 0.5
+        hasil.append([pos, neg, polarity, pos_ratio, neg_ratio,
+                      round(sentimen_persen, 2), round(sentimen_score, 4)])
+    return np.array(hasil)
+
+# Ambil teks_clean yang sesuai dengan split train/test
+# X_train sekarang sudah berisi teks_clean, langsung pakai
+fitur_sentimen_train = hitung_fitur_sentimen(X_train)
+fitur_sentimen_test  = hitung_fitur_sentimen(X_test)
+
+# Gabungkan TF-IDF (sparse) dengan fitur sentimen (dense → sparse)
+X_train_gabung = hstack([X_train_tfidf, csr_matrix(fitur_sentimen_train)])
+X_test_gabung  = hstack([X_test_tfidf,  csr_matrix(fitur_sentimen_test)])
+
+fitur_sentimen_nama = ['pos_count', 'neg_count', 'polarity',
+                       'pos_ratio', 'neg_ratio',
+                       'sentimen_persen', 'sentimen_score']
+print(f'✅ Fitur sentimen lexicon ditambahkan ({len(fitur_sentimen_nama)} fitur)')
+print(f'   Fitur: {", ".join(fitur_sentimen_nama)}')
+print(f'   Dimensi fitur final: Train {X_train_gabung.shape}, Test {X_test_gabung.shape}')
+
 # ─── 6.3 Fungsi Evaluasi Model ──────────────────────────────
 def evaluasi_model(nama, model, X_tr, X_te, y_tr, y_te):
     """Latih model dan kembalikan metrik evaluasi"""
@@ -528,9 +707,9 @@ def evaluasi_model(nama, model, X_tr, X_te, y_tr, y_te):
     rec  = recall_score(y_te, y_pred, average='weighted', zero_division=0)
     f1   = f1_score(y_te, y_pred, average='weighted', zero_division=0)
 
-    print(f'\n{'='*55}')
+    print(f'\n{"="*55}')
     print(f'  MODEL: {nama}')
-    print(f'{'='*55}')
+    print(f'{"="*55}')
     print(f'  Accuracy  : {acc:.4f} ({acc*100:.2f}%)')
     print(f'  Precision : {prec:.4f}')
     print(f'  Recall    : {rec:.4f}')
@@ -557,7 +736,7 @@ svm_model = SVC(
 hasil_svm = evaluasi_model(
     'SVM (Linear)',
     svm_model,
-    X_train_tfidf, X_test_tfidf, y_train, y_test
+    X_train_gabung, X_test_gabung, y_train, y_test
 )
 hasil_semua.append({k: v for k, v in hasil_svm.items() if k not in ['y_pred', 'model_obj']})
 
@@ -572,8 +751,8 @@ from sklearn.preprocessing import MinMaxScaler
 from scipy.sparse import csr_matrix
 
 scaler_nb = MinMaxScaler()
-X_train_nb = csr_matrix(scaler_nb.fit_transform(X_train_tfidf.toarray()))
-X_test_nb  = csr_matrix(scaler_nb.transform(X_test_tfidf.toarray()))
+X_train_nb = csr_matrix(scaler_nb.fit_transform(X_train_gabung.toarray()))
+X_test_nb  = csr_matrix(scaler_nb.transform(X_test_gabung.toarray()))
 
 hasil_nb = evaluasi_model(
     'Naive Bayes (Multinomial)',
@@ -594,32 +773,32 @@ rf_model = RandomForestClassifier(
 hasil_rf = evaluasi_model(
     'Random Forest',
     rf_model,
-    X_train_tfidf, X_test_tfidf, y_train, y_test
+    X_train_gabung, X_test_gabung, y_train, y_test
 )
 hasil_semua.append({k: v for k, v in hasil_rf.items() if k not in ['y_pred', 'model_obj']})
 
 # ─── MODEL 4: Logistic Regression ───────────────────────────
 lr_model = LogisticRegression(max_iter=1000, class_weight='balanced', random_state=42)
 hasil_lr = evaluasi_model('Logistic Regression', lr_model,
-                           X_train_tfidf, X_test_tfidf, y_train, y_test)
+                           X_train_gabung, X_test_gabung, y_train, y_test)
 hasil_semua.append({k: v for k, v in hasil_lr.items() if k not in ['y_pred', 'model_obj']})
 
 # ─── MODEL 5: K-Nearest Neighbor ────────────────────────────
 knn_model = KNeighborsClassifier(n_neighbors=5)
 hasil_knn = evaluasi_model('KNN', knn_model,
-                            X_train_tfidf, X_test_tfidf, y_train, y_test)
+                            X_train_gabung, X_test_gabung, y_train, y_test)
 hasil_semua.append({k: v for k, v in hasil_knn.items() if k not in ['y_pred', 'model_obj']})
 
 # ─── MODEL 6: Decision Tree ──────────────────────────────────
 dt_model = DecisionTreeClassifier(class_weight='balanced', random_state=42)
 hasil_dt = evaluasi_model('Decision Tree', dt_model,
-                           X_train_tfidf, X_test_tfidf, y_train, y_test)
+                           X_train_gabung, X_test_gabung, y_train, y_test)
 hasil_semua.append({k: v for k, v in hasil_dt.items() if k not in ['y_pred', 'model_obj']})
 
 # ─── MODEL 7: Gradient Boosting ──────────────────────────────
 gb_model = GradientBoostingClassifier(n_estimators=100, random_state=42)
 hasil_gb = evaluasi_model('Gradient Boosting', gb_model,
-                           X_train_tfidf, X_test_tfidf, y_train, y_test)
+                           X_train_gabung, X_test_gabung, y_train, y_test)
 hasil_semua.append({k: v for k, v in hasil_gb.items() if k not in ['y_pred', 'model_obj']})
 
 """---
@@ -784,15 +963,15 @@ model_list = [
 ]
 
 for nama, model in model_list:
-    # Khusus Naive Bayes pakai X_train_nb
+    # Khusus Naive Bayes pakai X_train_nb (scaled)
     if nama == 'Naive Bayes':
         model.fit(X_train_nb, y_train)
         train_acc = accuracy_score(y_train, model.predict(X_train_nb))
         test_acc  = accuracy_score(y_test,  model.predict(X_test_nb))
     else:
-        model.fit(X_train_tfidf, y_train)
-        train_acc = accuracy_score(y_train, model.predict(X_train_tfidf))
-        test_acc  = accuracy_score(y_test,  model.predict(X_test_tfidf))
+        model.fit(X_train_gabung, y_train)
+        train_acc = accuracy_score(y_train, model.predict(X_train_gabung))
+        test_acc  = accuracy_score(y_test,  model.predict(X_test_gabung))
 
     selisih = train_acc - test_acc
 
@@ -885,7 +1064,7 @@ plt.show()
 # ─── 7.7 Analisis Kesalahan Prediksi (Error Analysis) ────────
 
 # Ambil data test beserta prediksi SVM
-df_test = X_test.reset_index(drop=True).to_frame(name='teks_proses')
+df_test = X_test.reset_index(drop=True).to_frame(name='teks_clean')
 df_test['label_asli']    = y_test.reset_index(drop=True)
 df_test['label_prediksi'] = hasil_svm['y_pred']
 
@@ -913,7 +1092,7 @@ for _, row in pola_salah.iterrows():
     contoh = df_salah[
         (df_salah['label_asli'] == asli) &
         (df_salah['label_prediksi'] == pred)
-    ]['teks_proses'].head(3).tolist()
+    ]['teks_clean'].head(3).tolist()
 
     print(f'  ❌ {asli} → diprediksi {pred} ({jml} tweet)')
     for i, t in enumerate(contoh, 1):
@@ -1445,8 +1624,25 @@ teks_baru = [
 
 for teks in teks_baru:
     pred = final_model.predict([teks])[0]
-    print(f'  Teks  : "{teks}"')
-    print(f'  Prediksi: {pred}\n')
+
+    # Hitung presentase sentimen dari lexicon
+    kata = teks.lower().split()
+    pos_lx = sum(1 for k in kata if k in lexicon_positif)
+    neg_lx = sum(1 for k in kata if k in lexicon_negatif)
+    total_lx = pos_lx + neg_lx
+    skor_persen = ((pos_lx - neg_lx) / (total_lx + 1)) * 100
+
+    if skor_persen > 0:
+        arah = '🟢 positif'
+    elif skor_persen < 0:
+        arah = '🔴 negatif'
+    else:
+        arah = '⚪ netral'
+
+    print(f'  Teks    : "{teks}"')
+    print(f'  Prediksi: {pred}')
+    print(f'  Lexicon : {skor_persen:+.1f}% ({arah}, +{pos_lx}/-{neg_lx})')
+    print()
 
 """---
 ## 📝 Catatan Penting
