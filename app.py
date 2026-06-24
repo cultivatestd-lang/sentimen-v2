@@ -16,11 +16,8 @@ st.title("🍽️ Analisis Sentimen Program Makan Bergizi Gratis")
 # ─── CACHE ─────────────────────────────────────────────────────
 @st.cache_resource
 def load_nlp():
-    import nltk
     from Sastrawi.Stemmer.StemmerFactory import StemmerFactory
     from Sastrawi.StopWordRemover.StopWordRemoverFactory import StopWordRemoverFactory
-    nltk.download('punkt', quiet=True)
-    nltk.download('stopwords', quiet=True)
     factory_stemmer = StemmerFactory()
     stemmer = factory_stemmer.create_stemmer()
     factory_stop = StopWordRemoverFactory()
@@ -126,10 +123,8 @@ def cleaning_teks(teks):
 
 def tokenize_dan_clean(teks):
     if not teks or teks.strip() == '': return ''
-    from nltk.tokenize import word_tokenize
-    tokens = word_tokenize(teks)
     semua_stopword = stopword_set | custom_stopwords
-    tokens = [t for t in tokens if t not in semua_stopword and len(t) > 2]
+    tokens = [t for t in teks.split() if t not in semua_stopword and len(t) > 2]
     tokens = [kamus_stem_kustom.get(t, stemmer.stem(t)) for t in tokens]
     return ' '.join(tokens)
 

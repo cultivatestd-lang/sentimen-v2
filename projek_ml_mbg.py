@@ -19,12 +19,9 @@ from wordcloud import WordCloud
 warnings.filterwarnings('ignore')
 
 # NLP
-import nltk
-from nltk.tokenize import word_tokenize
 from Sastrawi.Stemmer.StemmerFactory import StemmerFactory
 from Sastrawi.StopWordRemover.StopWordRemoverFactory import StopWordRemoverFactory
-nltk.download('punkt', quiet=True)
-nltk.download('stopwords', quiet=True)
+
 
 # ML
 from sklearn.model_selection import train_test_split, StratifiedKFold
@@ -188,8 +185,7 @@ semua_stopword = set(stopword_list) | set(custom_stopwords)
 def tokenize_dan_clean(teks):
     if not teks or teks.strip() == '':
         return ''
-    tokens = word_tokenize(teks)
-    tokens = [t for t in tokens if t not in semua_stopword and len(t) > 2]
+    tokens = [t for t in teks.split() if t not in semua_stopword and len(t) > 2]
     tokens = [stem_kustom(t) for t in tokens]
     return ' '.join(tokens)
 
