@@ -1,14 +1,7 @@
 streamlit
 pandas
 numpy
+scikit-learn==1.6.1
+scipy
 nltk
-sastrawi
-scikit-learn
-matplotlib
-seaborn
-wordcloud
-plotly
-transformers
-torch
-tqdm
-optuna
+PySastrawi
